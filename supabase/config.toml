@@ -1,0 +1,4 @@
+project_id = "syshvzizgbpemqxiwebr"
+
+[functions.director-llm]
+verify_jwt = false
