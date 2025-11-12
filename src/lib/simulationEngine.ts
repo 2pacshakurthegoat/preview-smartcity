@@ -153,16 +153,18 @@ export const createInitialWorld = (): WorldState => {
 export const moveAgentTowards = (agent: Agent, target: Position): Position => {
   const dx = target.x - agent.position.x;
   const dy = target.y - agent.position.y;
-  
-  const distance = Math.sqrt(dx * dx + dy * dy);
-  
-  if (distance < agent.speed * 0.1) {
+
+  const distanceSquared = dx * dx + dy * dy;
+  const speedThreshold = agent.speed * 0.1;
+
+  if (distanceSquared < speedThreshold * speedThreshold) {
     return target;
   }
-  
+
+  const distance = Math.sqrt(distanceSquared);
   const normalizedDx = dx / distance;
   const normalizedDy = dy / distance;
-  
+
   return {
     x: Math.max(0, Math.min(GRID_SIZE - 1, agent.position.x + normalizedDx * agent.speed * 0.1)),
     y: Math.max(0, Math.min(GRID_SIZE - 1, agent.position.y + normalizedDy * agent.speed * 0.1)),

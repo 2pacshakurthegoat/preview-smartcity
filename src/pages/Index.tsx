@@ -79,13 +79,13 @@ const Index = () => {
     };
   }, [isRunning, isDirectorEnabled, worldState.events.length, worldState.roads, toast]);
 
-  // Simulation loop
+  // Simulation loop - reduced to 50ms for better performance
   useEffect(() => {
     if (!isRunning) return;
 
     const interval = setInterval(() => {
       setWorldState(prevState => updateWorldState(prevState));
-    }, 100);
+    }, 50);
 
     return () => clearInterval(interval);
   }, [isRunning]);

@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 
 interface NPCModelProps {
@@ -14,86 +14,72 @@ export const NPCModel = ({ color, position, rotation = [0, 0, 0], isWalking = fa
   const rightLegRef = useRef<any>(null);
   const leftArmRef = useRef<any>(null);
   const rightArmRef = useRef<any>(null);
+  const timeOffsetRef = useRef(Math.random() * 1000);
 
-  useFrame(() => {
-    if (isWalking) {
-      const time = Date.now() * 0.01;
-      
-      // Walking animation
+  useFrame((state) => {
+    if (isWalking && groupRef.current) {
+      const time = (state.clock.elapsedTime + timeOffsetRef.current * 0.001) * 1.2;
+
       if (leftLegRef.current) leftLegRef.current.rotation.x = Math.sin(time) * 0.5;
       if (rightLegRef.current) rightLegRef.current.rotation.x = Math.sin(time + Math.PI) * 0.5;
       if (leftArmRef.current) leftArmRef.current.rotation.x = Math.sin(time + Math.PI) * 0.3;
       if (rightArmRef.current) rightArmRef.current.rotation.x = Math.sin(time) * 0.3;
-      
-      // Subtle bob
-      if (groupRef.current) {
-        groupRef.current.position.y = position[1] + Math.abs(Math.sin(time * 2)) * 0.02;
-      }
+
+      groupRef.current.position.y = Math.abs(Math.sin(time * 2)) * 0.015;
+    } else if (groupRef.current) {
+      groupRef.current.position.y = 0;
     }
   });
 
+  const headGeometry = useMemo(() => new (require('three')).SphereGeometry(0.08, 8, 8), []);
+  const torsoGeometry = useMemo(() => new (require('three')).BoxGeometry(0.15, 0.2, 0.1), []);
+  const limbGeometry = useMemo(() => new (require('three')).CylinderGeometry(0.03, 0.03, 0.16, 6), []);
+  const footGeometry = useMemo(() => new (require('three')).BoxGeometry(0.06, 0.02, 0.1), []);
+
   return (
     <group ref={groupRef} position={position} rotation={rotation}>
-      {/* Head */}
-      <mesh position={[0, 0.35, 0]}>
-        <sphereGeometry args={[0.08, 16, 16]} />
+      <mesh position={[0, 0.35, 0]} geometry={headGeometry}>
         <meshStandardMaterial color="#FFD4A3" />
       </mesh>
-      
-      {/* Torso */}
-      <mesh position={[0, 0.2, 0]}>
-        <boxGeometry args={[0.15, 0.2, 0.1]} />
+
+      <mesh position={[0, 0.2, 0]} geometry={torsoGeometry}>
         <meshStandardMaterial color={color} />
       </mesh>
-      
-      {/* Left arm */}
+
       <group ref={leftArmRef} position={[0.11, 0.25, 0]}>
-        <mesh position={[0, -0.08, 0]}>
-          <cylinderGeometry args={[0.03, 0.03, 0.16, 8]} />
+        <mesh position={[0, -0.08, 0]} geometry={limbGeometry}>
           <meshStandardMaterial color={color} />
         </mesh>
-        {/* Hand */}
         <mesh position={[0, -0.18, 0]}>
-          <sphereGeometry args={[0.035, 8, 8]} />
+          <sphereGeometry args={[0.035, 6, 6]} />
           <meshStandardMaterial color="#FFD4A3" />
         </mesh>
       </group>
-      
-      {/* Right arm */}
+
       <group ref={rightArmRef} position={[-0.11, 0.25, 0]}>
-        <mesh position={[0, -0.08, 0]}>
-          <cylinderGeometry args={[0.03, 0.03, 0.16, 8]} />
+        <mesh position={[0, -0.08, 0]} geometry={limbGeometry}>
           <meshStandardMaterial color={color} />
         </mesh>
-        {/* Hand */}
         <mesh position={[0, -0.18, 0]}>
-          <sphereGeometry args={[0.035, 8, 8]} />
+          <sphereGeometry args={[0.035, 6, 6]} />
           <meshStandardMaterial color="#FFD4A3" />
         </mesh>
       </group>
-      
-      {/* Left leg */}
+
       <group ref={leftLegRef} position={[0.05, 0.08, 0]}>
-        <mesh position={[0, -0.08, 0]}>
-          <cylinderGeometry args={[0.04, 0.04, 0.16, 8]} />
+        <mesh position={[0, -0.08, 0]} geometry={limbGeometry}>
           <meshStandardMaterial color="#2a2a2a" />
         </mesh>
-        {/* Foot */}
-        <mesh position={[0, -0.17, 0.02]}>
-          <boxGeometry args={[0.06, 0.02, 0.1]} />
+        <mesh position={[0, -0.17, 0.02]} geometry={footGeometry}>
           <meshStandardMaterial color="#1a1a1a" />
         </mesh>
       </group>
-      
-      {/* Right leg */}
+
       <group ref={rightLegRef} position={[-0.05, 0.08, 0]}>
-        <mesh position={[0, -0.08, 0]}>
-          <cylinderGeometry args={[0.04, 0.04, 0.16, 8]} />
+        <mesh position={[0, -0.08, 0]} geometry={limbGeometry}>
           <meshStandardMaterial color="#2a2a2a" />
         </mesh>
-        {/* Foot */}
-        <mesh position={[0, -0.17, 0.02]}>
-          <boxGeometry args={[0.06, 0.02, 0.1]} />
+        <mesh position={[0, -0.17, 0.02]} geometry={footGeometry}>
           <meshStandardMaterial color="#1a1a1a" />
         </mesh>
       </group>
