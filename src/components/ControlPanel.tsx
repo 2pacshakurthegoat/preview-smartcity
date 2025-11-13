@@ -8,6 +8,8 @@ import { Agent, SimulationEvent, EventType } from '@/types/simulation';
 
 interface ControlPanelProps {
   // LLM
+  apiKey: string;
+  onChangeApiKey: (key: string) => void;
   providerBaseUrl: string;
   modelId: string;
   onValidateLLM: () => void;
@@ -25,9 +27,13 @@ interface ControlPanelProps {
   onChangePrompt: (val: string) => void;
   onSubmitPrompt: () => void;
   onApplyPreset: (preset: string) => void;
+  agentSampleSize: number;
+  onChangeAgentSampleSize: (size: number) => void;
 }
 
 export const ControlPanel = ({
+  apiKey,
+  onChangeApiKey,
   providerBaseUrl,
   modelId,
   onValidateLLM,
@@ -45,6 +51,8 @@ export const ControlPanel = ({
   onChangePrompt,
   onSubmitPrompt,
   onApplyPreset,
+  agentSampleSize,
+  onChangeAgentSampleSize,
 }: ControlPanelProps) => {
   const getAgentIcon = (type: Agent['type']) => {
     switch (type) {
@@ -98,6 +106,16 @@ export const ControlPanel = ({
         <h2 className="text-lg font-semibold mb-3 text-foreground">LLM Settings</h2>
         <div className="space-y-2">
           <div>
+            <div className="text-xs text-muted-foreground mb-1">API Key</div>
+            <Input
+              type="password"
+              value={apiKey}
+              onChange={e => onChangeApiKey(e.target.value)}
+              placeholder="sk-... or csk-..."
+              className="font-mono"
+            />
+          </div>
+          <div>
             <div className="text-xs text-muted-foreground mb-1">Base URL</div>
             <Input
               value={providerBaseUrl}
@@ -114,6 +132,19 @@ export const ControlPanel = ({
               placeholder="gpt-oss-120b"
               className="font-mono"
             />
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground mb-1">Agent Sample Size (for Director)</div>
+            <Input
+              type="number"
+              value={agentSampleSize}
+              onChange={e => onChangeAgentSampleSize(parseInt(e.target.value) || 50)}
+              placeholder="50"
+              min="10"
+              max="500"
+              className="font-mono"
+            />
+            <div className="text-xs text-muted-foreground mt-1">Higher = more context, but may exceed token limits</div>
           </div>
         </div>
         <div className="flex gap-2 mt-3">

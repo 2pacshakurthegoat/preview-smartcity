@@ -37,83 +37,73 @@ const ModelShowcase = ({
 
 const FireModel = ({ position = [0, 0, 0] as [number, number, number] }) => (
   <group position={position}>
-    <mesh>
-      <coneGeometry args={[0.2, 0.6, 12]} />
-      <meshStandardMaterial color="#FF4500" emissive="#FF4500" emissiveIntensity={1.2} />
-    </mesh>
-    <mesh position={[0, 0.3, 0]}>
-      <sphereGeometry args={[0.12, 12, 12]} />
-      <meshStandardMaterial color="#FFA500" emissive="#FFA500" emissiveIntensity={1.0} />
-    </mesh>
+    <mesh position={[0, 0.2, 0]}><coneGeometry args={[0.28, 0.7, 12]} /><meshStandardMaterial color="#FF2200" emissive="#FF2200" emissiveIntensity={2.0} transparent opacity={0.9} /></mesh>
+    <mesh position={[0, 0.28, 0.08]}><coneGeometry args={[0.18, 0.55, 8]} /><meshStandardMaterial color="#FF6600" emissive="#FF6600" emissiveIntensity={1.6} transparent opacity={0.8} /></mesh>
+    <mesh position={[0, 0.45, 0]}><coneGeometry args={[0.12, 0.4, 8]} /><meshStandardMaterial color="#FFAA00" emissive="#FFAA00" emissiveIntensity={2.2} transparent opacity={0.75} /></mesh>
+    <mesh position={[0, 0.4, 0]}><sphereGeometry args={[0.18, 16, 16]} /><meshStandardMaterial color="#FFFF88" emissive="#FFFFFF" emissiveIntensity={2.8} transparent opacity={0.6} /></mesh>
+    <mesh position={[0, 0.7, 0]}><sphereGeometry args={[0.22, 10, 10]} /><meshStandardMaterial color="#2a2a2a" transparent opacity={0.5} /></mesh>
+    <pointLight position={[0, 0.3, 0]} color="#FF5500" intensity={3} distance={4} />
   </group>
 );
 
 const DestroyedBuildingModel = ({ position = [0, 0, 0] as [number, number, number] }) => (
   <group position={position}>
-    <mesh rotation={[0.2, 0.3, 0.1]}>
-      <boxGeometry args={[0.4, 0.15, 0.3]} />
-      <meshStandardMaterial color="#555" />
-    </mesh>
-    <mesh position={[0.1, 0.1, -0.05]} rotation={[0.1, -0.2, 0.2]}>
-      <boxGeometry args={[0.2, 0.1, 0.15]} />
-      <meshStandardMaterial color="#444" />
-    </mesh>
+    <mesh position={[0, 0.1, 0]} rotation={[0.12, 0.35, 0.08]}><boxGeometry args={[0.6, 0.25, 0.5]} /><meshStandardMaterial color="#3a3a3a" roughness={0.95} /></mesh>
+    <mesh position={[0.25, 0.18, -0.12]} rotation={[0.25, -0.45, 0.35]}><boxGeometry args={[0.28, 0.42, 0.1]} /><meshStandardMaterial color="#2a2a2a" roughness={0.95} /></mesh>
+    <mesh position={[-0.18, 0.06, 0.14]} rotation={[0.18, 0.75, -0.25]}><boxGeometry args={[0.22, 0.15, 0.18]} /><meshStandardMaterial color="#4a4a4a" roughness={1} /></mesh>
+    <mesh position={[0.18, 0.3, 0.02]} rotation={[0.45, 0, 0.28]}><cylinderGeometry args={[0.012, 0.012, 0.38, 8]} /><meshStandardMaterial color="#704214" metalness={0.75} /></mesh>
+    <mesh position={[0, 0.18, 0]}><sphereGeometry args={[0.42, 12, 12]} /><meshStandardMaterial color="#8a8a8a" transparent opacity={0.18} /></mesh>
   </group>
 );
 
 const PoliceBarrierModel = ({ position = [0, 0, 0] as [number, number, number] }) => (
   <group position={position}>
-    <mesh>
-      <boxGeometry args={[0.8, 0.1, 0.1]} />
-      <meshStandardMaterial color="#FF0000" />
-    </mesh>
-    <mesh position={[0, 0.1, 0]}>
-      <boxGeometry args={[0.8, 0.1, 0.1]} />
-      <meshStandardMaterial color="#FFFFFF" />
-    </mesh>
+    <mesh position={[-0.28, 0.09, 0]}><cylinderGeometry args={[0.028, 0.032, 0.2, 12]} /><meshStandardMaterial color="#0a0a0a" roughness={0.5} metalness={0.4} /></mesh>
+    <mesh position={[0.28, 0.09, 0]}><cylinderGeometry args={[0.028, 0.032, 0.2, 12]} /><meshStandardMaterial color="#0a0a0a" roughness={0.5} metalness={0.4} /></mesh>
+    <mesh position={[0, 0.17, 0]}><boxGeometry args={[0.6, 0.1, 0.08]} /><meshStandardMaterial color="#FFD700" roughness={0.15} metalness={0.5} /></mesh>
+    <mesh position={[-0.18, 0.17, 0.041]}><boxGeometry args={[0.12, 0.08, 0.002]} /><meshStandardMaterial color="#000000" /></mesh>
+    <mesh position={[0, 0.17, 0.041]}><boxGeometry args={[0.12, 0.08, 0.002]} /><meshStandardMaterial color="#000000" /></mesh>
+    <mesh position={[0.18, 0.17, 0.041]}><boxGeometry args={[0.12, 0.08, 0.002]} /><meshStandardMaterial color="#000000" /></mesh>
+    <mesh position={[-0.28, 0.14, 0.03]}><boxGeometry args={[0.035, 0.05, 0.002]} /><meshStandardMaterial color="#FF0000" emissive="#FF0000" emissiveIntensity={0.8} /></mesh>
+    <pointLight position={[-0.28, 0.14, 0.05]} color="#FF0000" intensity={0.8} distance={1.2} />
   </group>
 );
 
 const TrafficConeModel = ({ position = [0, 0, 0] as [number, number, number] }) => (
   <group position={position}>
-    <mesh>
-      <coneGeometry args={[0.12, 0.25, 12]} />
-      <meshStandardMaterial color="#FF7F00" />
-    </mesh>
-    <mesh position={[0, 0.08, 0]}>
-      <torusGeometry args={[0.08, 0.02, 8, 16]} />
-      <meshStandardMaterial color="#FFFFFF" />
-    </mesh>
+    <mesh position={[0, 0.008, 0]}><boxGeometry args={[0.16, 0.018, 0.16]} /><meshStandardMaterial color="#0a0a0a" roughness={0.85} /></mesh>
+    <mesh position={[0, 0.08, 0]}><coneGeometry args={[0.108, 0.14, 16]} /><meshStandardMaterial color="#FF4400" roughness={0.25} /></mesh>
+    <mesh position={[0, 0.18, 0]}><coneGeometry args={[0.088, 0.12, 16]} /><meshStandardMaterial color="#FF5500" roughness={0.25} /></mesh>
+    <mesh position={[0, 0.075, 0]}><cylinderGeometry args={[0.11, 0.11, 0.035, 16]} /><meshStandardMaterial color="#FFFFFF" emissive="#FFFFFF" emissiveIntensity={0.3} roughness={0.05} /></mesh>
+    <mesh position={[0, 0.165, 0]}><cylinderGeometry args={[0.095, 0.095, 0.032, 16]} /><meshStandardMaterial color="#FFFFFF" emissive="#FFFFFF" emissiveIntensity={0.3} roughness={0.05} /></mesh>
+    <mesh position={[0, 0.32, 0]}><sphereGeometry args={[0.032, 12, 12]} /><meshStandardMaterial color="#FF3300" roughness={0.15} /></mesh>
   </group>
 );
 
 const AmbulanceModel = ({ position = [0, 0, 0] as [number, number, number] }) => (
   <group position={position}>
-    <mesh>
-      <boxGeometry args={[0.5, 0.2, 0.25]} />
-      <meshStandardMaterial color="#FFFFFF" />
-    </mesh>
-    <mesh position={[0.2, 0.15, 0]}>
-      <boxGeometry args={[0.2, 0.12, 0.2]} />
-      <meshStandardMaterial color="#FF3333" />
-    </mesh>
+    <mesh position={[0, 0.12, 0]}><boxGeometry args={[0.52, 0.26, 0.3]} /><meshStandardMaterial color="#F5F5F5" roughness={0.15} metalness={0.4} /></mesh>
+    <mesh position={[0.18, 0.2, 0]}><boxGeometry args={[0.22, 0.16, 0.28]} /><meshStandardMaterial color="#F0F0F0" roughness={0.15} /></mesh>
+    <mesh position={[0, 0.13, 0.152]}><boxGeometry args={[0.53, 0.08, 0.002]} /><meshStandardMaterial color="#CC0000" /></mesh>
+    <mesh position={[0, 0.27, 0]}><boxGeometry args={[0.35, 0.05, 0.12]} /><meshStandardMaterial color="#1a1a1a" roughness={0.3} metalness={0.6} /></mesh>
+    <mesh position={[-0.12, 0.28, 0.03]}><boxGeometry args={[0.1, 0.04, 0.06]} /><meshStandardMaterial color="#FF0000" emissive="#FF0000" emissiveIntensity={1.5} /></mesh>
+    <mesh position={[0.18, 0.035, 0.16]} rotation={[0, 0, Math.PI/2]}><cylinderGeometry args={[0.045, 0.045, 0.04, 16]} /><meshStandardMaterial color="#0a0a0a" /></mesh>
+    <mesh position={[0, 0.16, 0.153]}><boxGeometry args={[0.05, 0.15, 0.002]} /><meshStandardMaterial color="#CC0000" emissive="#CC0000" emissiveIntensity={0.2} /></mesh>
+    <mesh position={[0, 0.16, 0.153]}><boxGeometry args={[0.15, 0.05, 0.002]} /><meshStandardMaterial color="#CC0000" emissive="#CC0000" emissiveIntensity={0.2} /></mesh>
+    <pointLight position={[-0.12, 0.28, 0]} color="#FF0000" intensity={1.2} distance={2.5} />
   </group>
 );
 
 const RepairCraneModel = ({ position = [0, 0, 0] as [number, number, number] }) => (
   <group position={position}>
-    <mesh>
-      <boxGeometry args={[0.4, 0.05, 0.2]} />
-      <meshStandardMaterial color="#666" />
-    </mesh>
-    <mesh position={[0, 0.15, 0]}>
-      <boxGeometry args={[0.05, 0.3, 0.05]} />
-      <meshStandardMaterial color="#777" />
-    </mesh>
-    <mesh position={[0.15, 0.3, 0]}>
-      <boxGeometry args={[0.3, 0.05, 0.05]} />
-      <meshStandardMaterial color="#888" />
-    </mesh>
+    <mesh position={[0, 0.025, 0]}><boxGeometry args={[0.45, 0.05, 0.45]} /><meshStandardMaterial color="#1a1a1a" roughness={0.75} metalness={0.3} /></mesh>
+    <mesh position={[0, 0.12, 0]}><boxGeometry args={[0.38, 0.18, 0.35]} /><meshStandardMaterial color="#FF9500" roughness={0.35} metalness={0.25} /></mesh>
+    <mesh position={[0, 0.42, 0]}><cylinderGeometry args={[0.042, 0.045, 0.3, 12]} /><meshStandardMaterial color="#FFD700" roughness={0.25} metalness={0.6} /></mesh>
+    <mesh position={[0.28, 0.7, 0]} rotation={[0, 0, Math.PI/5.5]}><boxGeometry args={[0.58, 0.035, 0.038]} /><meshStandardMaterial color="#777777" roughness={0.35} metalness={0.65} /></mesh>
+    <mesh position={[0.52, 0.58, 0]}><cylinderGeometry args={[0.008, 0.008, 0.24, 8]} /><meshStandardMaterial color="#2a2a2a" /></mesh>
+    <mesh position={[0.52, 0.42, 0]} rotation={[Math.PI/2, 0, 0]}><torusGeometry args={[0.035, 0.01, 10, 16]} /><meshStandardMaterial color="#FFD700" roughness={0.25} metalness={0.8} /></mesh>
+    <mesh position={[0, 0.73, 0]}><sphereGeometry args={[0.028, 12, 12]} /><meshStandardMaterial color="#FF3300" emissive="#FF3300" emissiveIntensity={1.2} /></mesh>
+    <pointLight position={[0, 0.73, 0]} color="#FF3300" intensity={0.8} distance={2} />
   </group>
 );
 

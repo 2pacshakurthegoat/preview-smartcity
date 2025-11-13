@@ -24,11 +24,17 @@ const Index = () => {
   const getDefaultBaseUrl = useCallback((mt: 'cerebras' | 'openai') => (
     mt === 'cerebras' ? (import.meta.env.VITE_OPENAI_BASE_URL || 'https://api.cerebras.ai/v1') : (import.meta.env.VITE_OPENAI_BASE_URL || 'https://api.openai.com/v1')
   ), []);
+  const [apiKey, setApiKey] = useState<string>(() => (
+    localStorage.getItem('llm.apiKey') || (import.meta.env.VITE_OPENAI_API_KEY || '')
+  ));
   const [providerBaseUrl, setProviderBaseUrl] = useState<string>(() => (
     localStorage.getItem('llm.baseUrl') || getDefaultBaseUrl('cerebras')
   ));
   const [modelId, setModelId] = useState<string>(() => (
     localStorage.getItem('llm.model') || (import.meta.env.VITE_OPENAI_MODEL || 'gpt-oss-120b')
+  ));
+  const [agentSampleSize, setAgentSampleSize] = useState<number>(() => (
+    parseInt(localStorage.getItem('llm.agentSampleSize') || '50')
   ));
   const [directorStrategy, setDirectorStrategy] = useState<string>('');
   const [isDirectorEnabled, setIsDirectorEnabled] = useState(true);
@@ -56,6 +62,8 @@ const Index = () => {
           baseUrl: providerBaseUrl,
           model: modelId,
           prompt: userPrompt,
+          sampleSize: agentSampleSize,
+          apiKey: apiKey,
         });
         
         if (response && response.instructions) {
@@ -212,7 +220,7 @@ const Index = () => {
     if (isDirectorEnabled && !isDirectorProcessing) {
       setIsDirectorProcessing(true);
       try {
-        const response = await callDirectorLLM(worldState, { baseUrl: providerBaseUrl, model: modelId, prompt: selected.prompt });
+        const response = await callDirectorLLM(worldState, { baseUrl: providerBaseUrl, model: modelId, prompt: selected.prompt, sampleSize: agentSampleSize });
         if (response.instructions) {
           setWorldState(prevState => applyDirectorInstructions(
             prevState,
@@ -334,6 +342,8 @@ const Index = () => {
               modelId={modelId}
               onChangeBaseUrl={(url) => { setProviderBaseUrl(url); localStorage.setItem('llm.baseUrl', url); }}
               onChangeModelId={(model) => { setModelId(model); localStorage.setItem('llm.model', model); }}
+              agentSampleSize={agentSampleSize}
+              onChangeAgentSampleSize={(size) => { setAgentSampleSize(size); localStorage.setItem('llm.agentSampleSize', size.toString()); }}
               onValidateLLM={async () => {
                 try {
                   const res = await validateLLM({ baseUrl: providerBaseUrl, model: modelId });
@@ -358,7 +368,7 @@ const Index = () => {
                 if (isDirectorProcessing) return;
                 setIsDirectorProcessing(true);
                 try {
-                  const response = await callDirectorLLM(worldState, { baseUrl: providerBaseUrl, model: modelId, prompt: userPrompt });
+                  const response = await callDirectorLLM(worldState, { baseUrl: providerBaseUrl, model: modelId, prompt: userPrompt, sampleSize: agentSampleSize });
                   if (response.instructions) {
                     setWorldState(prevState => applyDirectorInstructions(
                       prevState,
