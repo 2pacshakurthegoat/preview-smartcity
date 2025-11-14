@@ -51,7 +51,7 @@ export interface Building {
   color: string;
 }
 
-export type AssetKind = 'fire' | 'destroyed_building' | 'police_barrier' | 'traffic_cone' | 'ambulance' | 'repair_crane';
+export type AssetKind = 'fire' | 'destroyed_building' | 'police_barrier' | 'traffic_cone' | 'ambulance' | 'repair_crane' | 'police_car' | 'fire_truck' | 'street_light' | 'bench' | 'tree' | 'dumpster';
 
 export interface Asset {
   id: string;

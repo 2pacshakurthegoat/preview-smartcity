@@ -107,6 +107,55 @@ const RepairCraneModel = ({ position = [0, 0, 0] as [number, number, number] }) 
   </group>
 );
 
+const PoliceCarModel = ({ position = [0, 0, 0] as [number, number, number] }) => (
+  <group position={position}>
+    <mesh position={[0, 0.08, 0]}><boxGeometry args={[0.45, 0.2, 0.25]} /><meshStandardMaterial color="#FFFFFF" roughness={0.2} metalness={0.4} /></mesh>
+    <mesh position={[0.15, 0.16, 0]}><boxGeometry args={[0.18, 0.12, 0.22]} /><meshStandardMaterial color="#FFFFFF" roughness={0.2} /></mesh>
+    <mesh position={[0, 0.19, 0]}><boxGeometry args={[0.25, 0.04, 0.1]} /><meshStandardMaterial color="#1a1a1a" /></mesh>
+    <mesh position={[-0.08, 0.2, 0.03]}><boxGeometry args={[0.08, 0.03, 0.05]} /><meshStandardMaterial color="#FF0000" emissive="#FF0000" emissiveIntensity={1.5} /></mesh>
+    <mesh position={[0.08, 0.2, 0.03]}><boxGeometry args={[0.08, 0.03, 0.05]} /><meshStandardMaterial color="#0055FF" emissive="#0055FF" emissiveIntensity={1.5} /></mesh>
+  </group>
+);
+
+const FireTruckModel = ({ position = [0, 0, 0] as [number, number, number] }) => (
+  <group position={position}>
+    <mesh position={[0, 0.15, 0]}><boxGeometry args={[0.6, 0.3, 0.32]} /><meshStandardMaterial color="#CC0000" roughness={0.2} metalness={0.3} /></mesh>
+    <mesh position={[0.2, 0.25, 0]}><boxGeometry args={[0.25, 0.18, 0.3]} /><meshStandardMaterial color="#CC0000" roughness={0.2} /></mesh>
+    <mesh position={[-0.2, 0.2, 0.1]} rotation={[0, 0, Math.PI/2]}><cylinderGeometry args={[0.08, 0.08, 0.3, 12]} /><meshStandardMaterial color="#888888" metalness={0.7} /></mesh>
+  </group>
+);
+
+const StreetLightModel = ({ position = [0, 0, 0] as [number, number, number] }) => (
+  <group position={position}>
+    <mesh position={[0, 0.4, 0]}><cylinderGeometry args={[0.02, 0.025, 0.8, 12]} /><meshStandardMaterial color="#2a2a2a" metalness={0.6} /></mesh>
+    <mesh position={[0.15, 0.82, 0]} rotation={[0, 0, Math.PI/6]}><boxGeometry args={[0.3, 0.05, 0.08]} /><meshStandardMaterial color="#3a3a3a" metalness={0.5} /></mesh>
+    <mesh position={[0.28, 0.82, 0]}><boxGeometry args={[0.08, 0.08, 0.1]} /><meshStandardMaterial color="#FFFF88" emissive="#FFFF88" emissiveIntensity={1.5} /></mesh>
+    <pointLight position={[0.28, 0.82, 0]} color="#FFFF88" intensity={2} distance={8} />
+  </group>
+);
+
+const BenchModel = ({ position = [0, 0, 0] as [number, number, number] }) => (
+  <group position={position}>
+    <mesh position={[0, 0.15, 0]}><boxGeometry args={[0.4, 0.03, 0.15]} /><meshStandardMaterial color="#8B4513" roughness={0.9} /></mesh>
+    <mesh position={[0, 0.22, 0.06]}><boxGeometry args={[0.4, 0.2, 0.03]} /><meshStandardMaterial color="#8B4513" roughness={0.9} /></mesh>
+  </group>
+);
+
+const TreeModel = ({ position = [0, 0, 0] as [number, number, number] }) => (
+  <group position={position}>
+    <mesh position={[0, 0.15, 0]}><cylinderGeometry args={[0.04, 0.06, 0.3, 8]} /><meshStandardMaterial color="#4a2a1a" roughness={0.95} /></mesh>
+    <mesh position={[0, 0.35, 0]}><coneGeometry args={[0.25, 0.4, 8]} /><meshStandardMaterial color="#2a5a1a" roughness={0.8} /></mesh>
+    <mesh position={[0, 0.5, 0]}><coneGeometry args={[0.2, 0.35, 8]} /><meshStandardMaterial color="#2a6a1a" roughness={0.8} /></mesh>
+  </group>
+);
+
+const DumpsterModel = ({ position = [0, 0, 0] as [number, number, number] }) => (
+  <group position={position}>
+    <mesh position={[0, 0.15, 0]}><boxGeometry args={[0.4, 0.3, 0.25]} /><meshStandardMaterial color="#2a5a2a" roughness={0.7} metalness={0.2} /></mesh>
+    <mesh position={[0, 0.31, 0]}><boxGeometry args={[0.42, 0.02, 0.27]} /><meshStandardMaterial color="#1a4a1a" /></mesh>
+  </group>
+);
+
 const Gallery = () => {
   return (
     <div className="min-h-screen bg-background grid-background">
@@ -253,6 +302,54 @@ const Gallery = () => {
             description="Construction crane for building repairs"
           >
             <RepairCraneModel position={[0, 0, 0]} />
+          </ModelShowcase>
+
+          {/* Police Car */}
+          <ModelShowcase
+            title="Police Car"
+            description="Emergency police vehicle with flashing lights"
+          >
+            <PoliceCarModel position={[0, 0, 0]} />
+          </ModelShowcase>
+
+          {/* Fire Truck */}
+          <ModelShowcase
+            title="Fire Truck"
+            description="Emergency fire truck with ladder"
+          >
+            <FireTruckModel position={[0, 0, 0]} />
+          </ModelShowcase>
+
+          {/* Street Light */}
+          <ModelShowcase
+            title="Street Light"
+            description="Illuminated street lamp"
+          >
+            <StreetLightModel position={[0, 0, 0]} />
+          </ModelShowcase>
+
+          {/* Bench */}
+          <ModelShowcase
+            title="Park Bench"
+            description="Wooden bench for city parks"
+          >
+            <BenchModel position={[0, 0, 0]} />
+          </ModelShowcase>
+
+          {/* Tree */}
+          <ModelShowcase
+            title="Tree"
+            description="City park tree with green foliage"
+          >
+            <TreeModel position={[0, 0, 0]} />
+          </ModelShowcase>
+
+          {/* Dumpster */}
+          <ModelShowcase
+            title="Dumpster"
+            description="Waste dumpster for city maintenance"
+          >
+            <DumpsterModel position={[0, 0, 0]} />
           </ModelShowcase>
         </div>
 

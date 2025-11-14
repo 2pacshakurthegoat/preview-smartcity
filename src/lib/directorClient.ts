@@ -84,7 +84,7 @@ export const callDirectorLLM = async (worldState: WorldState, opts?: { baseUrl?:
         type: 'function',
         function: {
           name: 'spawn_assets',
-          description: 'Spawn emergency assets like fires, ambulances, police barriers, traffic cones, destroyed buildings, repair cranes',
+          description: 'Spawn assets: fires, ambulances, police_barriers, traffic_cones, destroyed_buildings, repair_cranes, police_cars, fire_trucks, street_lights, benches, trees, dumpsters',
           parameters: {
             type: 'object',
             properties: {
@@ -93,7 +93,7 @@ export const callDirectorLLM = async (worldState: WorldState, opts?: { baseUrl?:
                 items: {
                   type: 'object',
                   properties: {
-                    kind: { type: 'string', enum: ['fire', 'destroyed_building', 'police_barrier', 'traffic_cone', 'ambulance', 'repair_crane'] },
+                    kind: { type: 'string', enum: ['fire', 'destroyed_building', 'police_barrier', 'traffic_cone', 'ambulance', 'repair_crane', 'police_car', 'fire_truck', 'street_light', 'bench', 'tree', 'dumpster'] },
                     position: { 
                       type: 'object', 
                       properties: { x: { type: 'number' }, y: { type: 'number' } },
@@ -106,6 +106,49 @@ export const callDirectorLLM = async (worldState: WorldState, opts?: { baseUrl?:
               }
             },
             required: ['assets']
+          }
+        }
+      },
+      {
+        type: 'function',
+        function: {
+          name: 'remove_assets',
+          description: 'Remove assets by kind or position',
+          parameters: {
+            type: 'object',
+            properties: {
+              kind: { type: 'string', enum: ['fire', 'destroyed_building', 'police_barrier', 'traffic_cone', 'ambulance', 'repair_crane', 'police_car', 'fire_truck', 'street_light', 'bench', 'tree', 'dumpster'], description: 'Remove all of this kind' },
+              position: { 
+                type: 'object', 
+                properties: { x: { type: 'number' }, y: { type: 'number' } },
+                description: 'Remove assets near this position (within 5 units)'
+              }
+            }
+          }
+        }
+      },
+      {
+        type: 'function',
+        function: {
+          name: 'modify_roads',
+          description: 'Change road status (open, congested, blocked)',
+          parameters: {
+            type: 'object',
+            properties: {
+              changes: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    from: { type: 'object', properties: { x: { type: 'number' }, y: { type: 'number' } }, required: ['x', 'y'] },
+                    to: { type: 'object', properties: { x: { type: 'number' }, y: { type: 'number' } }, required: ['x', 'y'] },
+                    status: { type: 'string', enum: ['open', 'congested', 'blocked'] }
+                  },
+                  required: ['from', 'to', 'status']
+                }
+              }
+            },
+            required: ['changes']
           }
         }
       },
@@ -219,6 +262,22 @@ Use tools to implement this scenario.`
                 ttl: asset.ttl || 1500
               });
             });
+          }
+          break;
+        
+        case 'remove_assets':
+          parsed.assetsOps = parsed.assetsOps || [];
+          if (args.kind) {
+            parsed.assetsOps.push({ op: 'remove', kind: args.kind });
+          }
+          if (args.position) {
+            parsed.assetsOps.push({ op: 'remove', position: args.position, radius: 5 });
+          }
+          break;
+        
+        case 'modify_roads':
+          if (args.changes) {
+            parsed.roadChanges = args.changes;
           }
           break;
           

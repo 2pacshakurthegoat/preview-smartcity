@@ -17,7 +17,6 @@ interface ControlPanelProps {
   onChangeModelId: (model: string) => void;
   isRunning: boolean;
   onToggleSimulation: () => void;
-  onReset: () => void;
   onTriggerEvent: (type: EventType) => void;
   agents: Agent[];
   events: SimulationEvent[];
@@ -41,7 +40,6 @@ export const ControlPanel = ({
   onChangeModelId,
   isRunning,
   onToggleSimulation,
-  onReset,
   onTriggerEvent,
   agents,
   events,
@@ -73,6 +71,20 @@ export const ControlPanel = ({
 
   return (
     <div className="space-y-4">
+      {/* Changes Made */}
+      <Card className="p-4 bg-card border-primary/20 glow-primary">
+        <h2 className="text-lg font-semibold mb-3 text-primary">📝 Recent Changes</h2>
+        <div className="text-xs space-y-1 text-muted-foreground max-h-32 overflow-y-auto">
+          <div>✅ Added 6 new models: Police Car, Fire Truck, Street Light, Bench, Tree, Dumpster</div>
+          <div>✅ Added function calling tools for Director LLM</div>
+          <div>✅ Added remove_assets & modify_roads tools</div>
+          <div>✅ Added About & Reset buttons in header</div>
+          <div>✅ Enhanced all 6 emergency asset models (2-5x detail)</div>
+          <div>✅ Added API key input in settings</div>
+          <div>✅ Agent sample size now configurable (10-500)</div>
+        </div>
+      </Card>
+
       {/* Simulation Controls */}
       <Card className="p-4 bg-card border-primary/20 glow-primary">
         <h2 className="text-lg font-semibold mb-3 text-primary">Simulation Control</h2>
@@ -93,10 +105,6 @@ export const ControlPanel = ({
                 Start
               </>
             )}
-          </Button>
-          <Button onClick={onReset} variant="outline">
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Reset
           </Button>
         </div>
       </Card>

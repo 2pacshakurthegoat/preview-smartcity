@@ -1084,6 +1084,86 @@ const RepairCraneModel = ({ position }: { position: [number, number, number] }) 
   );
 };
 
+const PoliceCarModel = ({ position }: { position: [number, number, number] }) => {
+  const meshRef = useRef<THREE.Group>(null);
+  const time = useRef(0);
+  useFrame((_, delta) => { time.current += delta; });
+  const flash = Math.abs(Math.sin(time.current * 3)) * 1.5;
+  return (
+    <group position={position} ref={meshRef}>
+      <mesh position={[0, 0.08, 0]} castShadow><boxGeometry args={[0.45, 0.2, 0.25]} /><meshStandardMaterial color="#FFFFFF" roughness={0.2} metalness={0.4} /></mesh>
+      <mesh position={[0.15, 0.16, 0]} castShadow><boxGeometry args={[0.18, 0.12, 0.22]} /><meshStandardMaterial color="#FFFFFF" roughness={0.2} /></mesh>
+      <mesh position={[0, 0.19, 0]} castShadow><boxGeometry args={[0.25, 0.04, 0.1]} /><meshStandardMaterial color="#1a1a1a" /></mesh>
+      <mesh position={[-0.08, 0.2, 0.03]}><boxGeometry args={[0.08, 0.03, 0.05]} /><meshStandardMaterial color="#FF0000" emissive="#FF0000" emissiveIntensity={flash} transparent opacity={0.9} /></mesh>
+      <mesh position={[0.08, 0.2, 0.03]}><boxGeometry args={[0.08, 0.03, 0.05]} /><meshStandardMaterial color="#0055FF" emissive="#0055FF" emissiveIntensity={flash} transparent opacity={0.9} /></mesh>
+      <mesh position={[0.15, 0.03, 0.14]} rotation={[0, 0, Math.PI/2]} castShadow><cylinderGeometry args={[0.04, 0.04, 0.03, 16]} /><meshStandardMaterial color="#0a0a0a" /></mesh>
+      <mesh position={[0.15, 0.03, -0.14]} rotation={[0, 0, Math.PI/2]} castShadow><cylinderGeometry args={[0.04, 0.04, 0.03, 16]} /><meshStandardMaterial color="#0a0a0a" /></mesh>
+      <mesh position={[-0.15, 0.03, 0.14]} rotation={[0, 0, Math.PI/2]} castShadow><cylinderGeometry args={[0.04, 0.04, 0.03, 16]} /><meshStandardMaterial color="#0a0a0a" /></mesh>
+      <mesh position={[-0.15, 0.03, -0.14]} rotation={[0, 0, Math.PI/2]} castShadow><cylinderGeometry args={[0.04, 0.04, 0.03, 16]} /><meshStandardMaterial color="#0a0a0a" /></mesh>
+      <pointLight position={[-0.08, 0.2, 0]} color="#FF0000" intensity={flash * 0.8} distance={2} />
+      <pointLight position={[0.08, 0.2, 0]} color="#0055FF" intensity={flash * 0.8} distance={2} />
+    </group>
+  );
+};
+
+const FireTruckModel = ({ position }: { position: [number, number, number] }) => {
+  return (
+    <group position={position}>
+      <mesh position={[0, 0.15, 0]} castShadow><boxGeometry args={[0.6, 0.3, 0.32]} /><meshStandardMaterial color="#CC0000" roughness={0.2} metalness={0.3} /></mesh>
+      <mesh position={[0.2, 0.25, 0]} castShadow><boxGeometry args={[0.25, 0.18, 0.3]} /><meshStandardMaterial color="#CC0000" roughness={0.2} /></mesh>
+      <mesh position={[0, 0.32, 0]} castShadow><boxGeometry args={[0.35, 0.05, 0.12]} /><meshStandardMaterial color="#FFD700" /></mesh>
+      <mesh position={[-0.2, 0.2, 0.1]} castShadow><cylinderGeometry args={[0.08, 0.08, 0.3, 12]} /><meshStandardMaterial color="#888888" metalness={0.7} /></mesh>
+      <mesh position={[0.2, 0.04, 0.18]} rotation={[0, 0, Math.PI/2]} castShadow><cylinderGeometry args={[0.05, 0.05, 0.04, 16]} /><meshStandardMaterial color="#0a0a0a" /></mesh>
+      <mesh position={[-0.2, 0.04, 0.18]} rotation={[0, 0, Math.PI/2]} castShadow><cylinderGeometry args={[0.05, 0.05, 0.04, 16]} /><meshStandardMaterial color="#0a0a0a" /></mesh>
+    </group>
+  );
+};
+
+const StreetLightModel = ({ position }: { position: [number, number, number] }) => {
+  return (
+    <group position={position}>
+      <mesh position={[0, 0.4, 0]} castShadow><cylinderGeometry args={[0.02, 0.025, 0.8, 12]} /><meshStandardMaterial color="#2a2a2a" metalness={0.6} /></mesh>
+      <mesh position={[0, 0.02, 0]}><cylinderGeometry args={[0.06, 0.08, 0.04, 12]} /><meshStandardMaterial color="#1a1a1a" /></mesh>
+      <mesh position={[0.15, 0.82, 0]} rotation={[0, 0, Math.PI/6]}><boxGeometry args={[0.3, 0.05, 0.08]} /><meshStandardMaterial color="#3a3a3a" metalness={0.5} /></mesh>
+      <mesh position={[0.28, 0.82, 0]}><boxGeometry args={[0.08, 0.08, 0.1]} /><meshStandardMaterial color="#FFFF88" emissive="#FFFF88" emissiveIntensity={1.5} /></mesh>
+      <pointLight position={[0.28, 0.82, 0]} color="#FFFF88" intensity={2} distance={8} decay={2} />
+    </group>
+  );
+};
+
+const BenchModel = ({ position }: { position: [number, number, number] }) => {
+  return (
+    <group position={position}>
+      <mesh position={[0, 0.15, 0]}><boxGeometry args={[0.4, 0.03, 0.15]} /><meshStandardMaterial color="#8B4513" roughness={0.9} /></mesh>
+      <mesh position={[0, 0.22, 0.06]}><boxGeometry args={[0.4, 0.2, 0.03]} /><meshStandardMaterial color="#8B4513" roughness={0.9} /></mesh>
+      <mesh position={[-0.15, 0.08, -0.05]}><cylinderGeometry args={[0.015, 0.015, 0.16, 8]} /><meshStandardMaterial color="#2a2a2a" metalness={0.7} /></mesh>
+      <mesh position={[0.15, 0.08, -0.05]}><cylinderGeometry args={[0.015, 0.015, 0.16, 8]} /><meshStandardMaterial color="#2a2a2a" metalness={0.7} /></mesh>
+    </group>
+  );
+};
+
+const TreeModel = ({ position }: { position: [number, number, number] }) => {
+  return (
+    <group position={position}>
+      <mesh position={[0, 0.15, 0]} castShadow><cylinderGeometry args={[0.04, 0.06, 0.3, 8]} /><meshStandardMaterial color="#4a2a1a" roughness={0.95} /></mesh>
+      <mesh position={[0, 0.35, 0]} castShadow><coneGeometry args={[0.25, 0.4, 8]} /><meshStandardMaterial color="#2a5a1a" roughness={0.8} /></mesh>
+      <mesh position={[0, 0.5, 0]} castShadow><coneGeometry args={[0.2, 0.35, 8]} /><meshStandardMaterial color="#2a6a1a" roughness={0.8} /></mesh>
+      <mesh position={[0, 0.62, 0]} castShadow><coneGeometry args={[0.15, 0.28, 8]} /><meshStandardMaterial color="#2a7a1a" roughness={0.8} /></mesh>
+    </group>
+  );
+};
+
+const DumpsterModel = ({ position }: { position: [number, number, number] }) => {
+  return (
+    <group position={position}>
+      <mesh position={[0, 0.15, 0]} castShadow><boxGeometry args={[0.4, 0.3, 0.25]} /><meshStandardMaterial color="#2a5a2a" roughness={0.7} metalness={0.2} /></mesh>
+      <mesh position={[0, 0.31, 0]} castShadow><boxGeometry args={[0.42, 0.02, 0.27]} /><meshStandardMaterial color="#1a4a1a" /></mesh>
+      <mesh position={[-0.18, 0.04, 0.14]} rotation={[0, 0, Math.PI/2]}><cylinderGeometry args={[0.04, 0.04, 0.05, 12]} /><meshStandardMaterial color="#1a1a1a" /></mesh>
+      <mesh position={[0.18, 0.04, 0.14]} rotation={[0, 0, Math.PI/2]}><cylinderGeometry args={[0.04, 0.04, 0.05, 12]} /><meshStandardMaterial color="#1a1a1a" /></mesh>
+    </group>
+  );
+};
+
 const Scene = ({ worldState, shake }: { worldState: WorldState; shake: boolean }) => {
   const sceneRef = useRef<THREE.Group>(null);
 
