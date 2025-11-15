@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { CityGrid } from '@/components/CityGrid';
+import PromptOverlay from '@/components/PromptOverlay';
 import { ControlPanel } from '@/components/ControlPanel';
 import { WorldState, EventType } from '@/types/simulation';
 import { 
@@ -33,12 +34,11 @@ const Index = () => {
   const [modelId, setModelId] = useState<string>(() => (
     localStorage.getItem('llm.model') || (import.meta.env.VITE_OPENAI_MODEL || 'gpt-oss-120b')
   ));
-  const [agentSampleSize, setAgentSampleSize] = useState<number>(() => (
-    parseInt(localStorage.getItem('llm.agentSampleSize') || '50')
-  ));
+  // Removed agentSampleSize UI (reverted as requested)
   const [directorStrategy, setDirectorStrategy] = useState<string>('');
   const [isDirectorEnabled, setIsDirectorEnabled] = useState(true);
   const [userPrompt, setUserPrompt] = useState<string>(() => localStorage.getItem('llm.prompt') || '');
+  const [isPromptOpen, setIsPromptOpen] = useState<boolean>(false);
   const [isDirectorProcessing, setIsDirectorProcessing] = useState(false);
   const directorIntervalRef = useRef<number | null>(null);
 
@@ -62,7 +62,6 @@ const Index = () => {
           baseUrl: providerBaseUrl,
           model: modelId,
           prompt: userPrompt,
-          sampleSize: agentSampleSize,
           apiKey: apiKey,
         });
         
@@ -220,7 +219,7 @@ const Index = () => {
     if (isDirectorEnabled && !isDirectorProcessing) {
       setIsDirectorProcessing(true);
       try {
-        const response = await callDirectorLLM(worldState, { baseUrl: providerBaseUrl, model: modelId, prompt: selected.prompt, sampleSize: agentSampleSize });
+        const response = await callDirectorLLM(worldState, { baseUrl: providerBaseUrl, model: modelId, prompt: selected.prompt, apiKey: apiKey });
         if (response.instructions) {
           setWorldState(prevState => applyDirectorInstructions(
             prevState,
@@ -337,13 +336,40 @@ const Index = () => {
 
           {/* Control Panel */}
           <div className="lg:col-span-1 overflow-y-auto">
+            <PromptOverlay
+               open={isPromptOpen}
+               prompt={userPrompt}
+               onChange={(val) => { setUserPrompt(val); localStorage.setItem('llm.prompt', val); }}
+               onApply={async () => {
+                 setIsPromptOpen(false);
+                 if (isDirectorProcessing) return;
+                 setIsDirectorProcessing(true);
+                 try {
+                   const response = await callDirectorLLM(worldState, { baseUrl: providerBaseUrl, model: modelId, prompt: userPrompt, apiKey: apiKey });
+                   if (response.instructions) {
+                     setWorldState(prevState => applyDirectorInstructions(
+                       prevState,
+                       response.instructions,
+                       response.assetsOps,
+                       response.shakeWorld
+                     ));
+                     setDirectorStrategy(response.globalStrategy || '');
+                     toast({ title: 'Scenario Applied', description: 'Director applied the scenario prompt.' });
+                   }
+                 } catch (e) {
+                   toast({ title: 'Scenario Failed', description: e instanceof Error ? e.message : 'Unknown error', variant: 'destructive' });
+                 } finally {
+                   setIsDirectorProcessing(false);
+                 }
+               }}
+               onClose={() => setIsPromptOpen(false)}
+            />
+
             <ControlPanel
               providerBaseUrl={providerBaseUrl}
               modelId={modelId}
               onChangeBaseUrl={(url) => { setProviderBaseUrl(url); localStorage.setItem('llm.baseUrl', url); }}
               onChangeModelId={(model) => { setModelId(model); localStorage.setItem('llm.model', model); }}
-              agentSampleSize={agentSampleSize}
-              onChangeAgentSampleSize={(size) => { setAgentSampleSize(size); localStorage.setItem('llm.agentSampleSize', size.toString()); }}
               onValidateLLM={async () => {
                 try {
                   const res = await validateLLM({ baseUrl: providerBaseUrl, model: modelId });
@@ -368,7 +394,7 @@ const Index = () => {
                 if (isDirectorProcessing) return;
                 setIsDirectorProcessing(true);
                 try {
-                  const response = await callDirectorLLM(worldState, { baseUrl: providerBaseUrl, model: modelId, prompt: userPrompt, sampleSize: agentSampleSize });
+                  const response = await callDirectorLLM(worldState, { baseUrl: providerBaseUrl, model: modelId, prompt: userPrompt, apiKey: apiKey });
                   if (response.instructions) {
                     setWorldState(prevState => applyDirectorInstructions(
                       prevState,

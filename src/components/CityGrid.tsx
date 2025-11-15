@@ -265,97 +265,198 @@ const FireModel = ({ position }: { position: [number, number, number] }) => {
 };
 
 const DestroyedBuildingModel = ({ position }: { position: [number, number, number] }) => {
+  const meshRef = useRef<THREE.Group>(null);
+  const time = useRef(0);
+  
+  useFrame((_, delta) => {
+    time.current += delta;
+  });
+
+  const emberGlow = Math.abs(Math.sin(time.current * 0.8)) * 0.6 + 0.4;
+  const smokeOpacity = Math.abs(Math.cos(time.current * 0.5)) * 0.08 + 0.12;
+  
+  // Randomly choose wide or regular building dimensions (computed once on mount)
+  const buildingConfig = useMemo(() => {
+    const isWide = Math.random() > 0.5;
+    return {
+      baseWidth: isWide ? 1.6 : 0.8,
+      baseDepth: isWide ? 0.6 : 0.8,
+      baseHeight: isWide ? 1.2 : 1.5,
+      baseColor: '#1a3a5a',
+      windowOpacities: Array.from({ length: 4 }, () => Math.random() > 0.5 ? 0 : 0.2)
+    };
+  }, []);
+  
+  const { baseWidth, baseDepth, baseHeight, baseColor, windowOpacities } = buildingConfig;
+  
   return (
-    <group position={position}>
-      {/* Main collapsed structure - larger base */}
-      <mesh position={[0, 0.1, 0]} rotation={[0.12, 0.35, 0.08]} castShadow>
-        <boxGeometry args={[0.6, 0.25, 0.5]} />
-        <meshStandardMaterial color="#3a3a3a" roughness={0.95} metalness={0.05} />
+    <group position={position} ref={meshRef}>
+      {/* Collapsed main structure - tilted and broken */}
+      <mesh position={[0, baseHeight * 0.3, 0]} rotation={[0.15, 0.4, 0.1]} castShadow receiveShadow>
+        <boxGeometry args={[baseWidth * 0.7, baseHeight * 0.5, baseDepth * 0.7]} />
+        <meshStandardMaterial color={baseColor} roughness={0.95} metalness={0.05} />
       </mesh>
       
-      {/* Tilted wall fragments */}
-      <mesh position={[0.25, 0.18, -0.12]} rotation={[0.25, -0.45, 0.35]} castShadow>
-        <boxGeometry args={[0.28, 0.42, 0.1]} />
-        <meshStandardMaterial color="#2a2a2a" roughness={0.95} />
-      </mesh>
-      <mesh position={[-0.22, 0.16, 0.15]} rotation={[-0.2, 0.6, -0.3]} castShadow>
-        <boxGeometry args={[0.3, 0.38, 0.09]} />
-        <meshStandardMaterial color="#353535" roughness={0.95} />
+      {/* Broken top section - heavily tilted */}
+      <mesh position={[baseWidth * 0.25, baseHeight * 0.6, -baseDepth * 0.15]} rotation={[0.3, -0.6, 0.4]} castShadow receiveShadow>
+        <boxGeometry args={[baseWidth * 0.4, baseHeight * 0.35, baseDepth * 0.5]} />
+        <meshStandardMaterial color={baseColor} roughness={0.96} />
       </mesh>
       
-      {/* Multiple broken concrete chunks */}
-      <mesh position={[-0.18, 0.06, 0.14]} rotation={[0.18, 0.75, -0.25]} castShadow>
-        <boxGeometry args={[0.22, 0.15, 0.18]} />
+      {/* Standing wall fragment with windows */}
+      <mesh position={[-baseWidth * 0.3, baseHeight * 0.45, baseDepth * 0.2]} rotation={[-0.2, 0.7, -0.35]} castShadow receiveShadow>
+        <boxGeometry args={[baseWidth * 0.35, baseHeight * 0.6, 0.12]} />
+        <meshStandardMaterial color={baseColor} roughness={0.96} />
+      </mesh>
+      
+      {/* Broken windows on standing wall */}
+      {Array.from({ length: 2 }, (_, floor) => (
+        Array.from({ length: 2 }, (_, col) => {
+          const windowIndex = floor * 2 + col;
+          return (
+            <mesh 
+              key={`broken-window-${floor}-${col}`}
+              position={[
+                -baseWidth * 0.3 + (col - 0.5) * 0.15,
+                baseHeight * 0.3 + floor * 0.25,
+                baseDepth * 0.26
+              ]}
+              rotation={[-0.2, 0.7, -0.35]}
+            >
+              <planeGeometry args={[0.1, 0.12]} />
+              <meshStandardMaterial 
+                color="#88CCFF" 
+                transparent 
+                opacity={windowOpacities[windowIndex]} 
+                roughness={0.05}
+              />
+            </mesh>
+          );
+        })
+      ))}
+      
+      {/* Fallen roof section */}
+      <mesh position={[baseWidth * 0.15, baseHeight * 0.15, baseDepth * 0.25]} rotation={[0.25, 0.35, 0.15]} castShadow>
+        <boxGeometry args={[baseWidth * 0.8, 0.1, baseDepth * 0.7]} />
+        <meshStandardMaterial color="#0a0a0a" roughness={0.95} />
+      </mesh>
+      
+      {/* Multiple concrete chunks */}
+      <mesh position={[-baseWidth * 0.25, 0.08, baseDepth * 0.2]} rotation={[0.2, 0.8, -0.28]} castShadow>
+        <boxGeometry args={[0.24, 0.16, 0.2]} />
         <meshStandardMaterial color="#4a4a4a" roughness={1} />
       </mesh>
-      <mesh position={[0.15, 0.04, 0.18]} rotation={[-0.12, 0.25, 0.18]} castShadow>
-        <boxGeometry args={[0.16, 0.1, 0.14]} />
+      <mesh position={[baseWidth * 0.2, 0.06, baseDepth * 0.25]} rotation={[-0.15, 0.3, 0.2]} castShadow>
+        <boxGeometry args={[0.18, 0.12, 0.16]} />
         <meshStandardMaterial color="#555555" roughness={1} />
       </mesh>
-      <mesh position={[0.08, 0.03, -0.16]} rotation={[0.15, -0.4, 0.12]} castShadow>
-        <boxGeometry args={[0.14, 0.09, 0.12]} />
+      <mesh position={[baseWidth * 0.1, 0.05, -baseDepth * 0.22]} rotation={[0.18, -0.45, 0.15]} castShadow>
+        <boxGeometry args={[0.16, 0.1, 0.14]} />
         <meshStandardMaterial color="#5a5a5a" roughness={1} />
       </mesh>
-      <mesh position={[-0.12, 0.02, -0.12]} rotation={[-0.08, 0.55, -0.15]} castShadow>
-        <boxGeometry args={[0.12, 0.07, 0.11]} />
+      <mesh position={[-baseWidth * 0.15, 0.04, -baseDepth * 0.18]} rotation={[-0.1, 0.6, -0.18]} castShadow>
+        <boxGeometry args={[0.14, 0.08, 0.13]} />
         <meshStandardMaterial color="#606060" roughness={1} />
       </mesh>
       
-      {/* Rebar sticking out - more pieces */}
-      <mesh position={[0.18, 0.3, 0.02]} rotation={[0.45, 0, 0.28]} castShadow>
-        <cylinderGeometry args={[0.012, 0.012, 0.38, 8]} />
-        <meshStandardMaterial color="#704214" metalness={0.75} roughness={0.35} />
-      </mesh>
-      <mesh position={[-0.14, 0.25, -0.06]} rotation={[0.28, 0.65, -0.35]} castShadow>
-        <cylinderGeometry args={[0.012, 0.012, 0.32, 8]} />
-        <meshStandardMaterial color="#8B4513" metalness={0.75} roughness={0.35} />
-      </mesh>
-      <mesh position={[0.22, 0.22, -0.08]} rotation={[0.35, -0.25, 0.42]} castShadow>
-        <cylinderGeometry args={[0.01, 0.01, 0.28, 8]} />
+      {/* Exposed rebar - protruding from broken sections */}
+      <mesh position={[baseWidth * 0.25, baseHeight * 0.5, 0]} rotation={[0.5, 0.05, 0.32]} castShadow>
+        <cylinderGeometry args={[0.014, 0.014, 0.45, 8]} />
         <meshStandardMaterial color="#704214" metalness={0.75} roughness={0.4} />
       </mesh>
-      <mesh position={[-0.08, 0.28, 0.12]} rotation={[0.52, 0.45, -0.22]} castShadow>
+      <mesh position={[-baseWidth * 0.2, baseHeight * 0.4, -baseDepth * 0.1]} rotation={[0.32, 0.7, -0.38]} castShadow>
+        <cylinderGeometry args={[0.013, 0.013, 0.4, 8]} />
+        <meshStandardMaterial color="#8B4513" metalness={0.7} roughness={0.38} />
+      </mesh>
+      <mesh position={[baseWidth * 0.3, baseHeight * 0.35, -baseDepth * 0.15]} rotation={[0.38, -0.3, 0.45]} castShadow>
         <cylinderGeometry args={[0.011, 0.011, 0.35, 8]} />
-        <meshStandardMaterial color="#8B4513" metalness={0.75} roughness={0.35} />
+        <meshStandardMaterial color="#704214" metalness={0.75} roughness={0.42} />
+      </mesh>
+      <mesh position={[-baseWidth * 0.12, baseHeight * 0.48, baseDepth * 0.18]} rotation={[0.55, 0.5, -0.25]} castShadow>
+        <cylinderGeometry args={[0.012, 0.012, 0.42, 8]} />
+        <meshStandardMaterial color="#8B4513" metalness={0.72} roughness={0.37} />
       </mesh>
       
-      {/* Cracked floor pieces */}
-      <mesh position={[0.28, 0.01, 0.22]} rotation={[-0.05, 0.15, 0.08]}>
-        <boxGeometry args={[0.18, 0.02, 0.16]} />
-        <meshStandardMaterial color="#3a3a3a" roughness={0.95} />
+      {/* Twisted metal beams from structure */}
+      <mesh position={[-baseWidth * 0.22, baseHeight * 0.25, baseDepth * 0.1]} rotation={[0.6, 0.4, -0.5]} castShadow>
+        <boxGeometry args={[0.04, 0.35, 0.04]} />
+        <meshStandardMaterial color="#444444" metalness={0.8} roughness={0.5} />
       </mesh>
-      <mesh position={[-0.24, 0.01, -0.2]} rotation={[0.06, -0.22, -0.05]}>
-        <boxGeometry args={[0.16, 0.02, 0.15]} />
-        <meshStandardMaterial color="#404040" roughness={0.95} />
-      </mesh>
-      
-      {/* Dust/debris clouds - layered */}
-      <mesh position={[0, 0.18, 0]}>
-        <sphereGeometry args={[0.42, 12, 12]} />
-        <meshStandardMaterial color="#8a8a8a" transparent opacity={0.18} />
-      </mesh>
-      <mesh position={[0.12, 0.25, 0.08]} rotation={[0.2, 0.3, 0]}>
-        <sphereGeometry args={[0.32, 10, 10]} />
-        <meshStandardMaterial color="#7a7a7a" transparent opacity={0.15} />
-      </mesh>
-      <mesh position={[-0.08, 0.3, -0.06]} rotation={[0.3, -0.2, 0.1]}>
-        <sphereGeometry args={[0.28, 10, 10]} />
-        <meshStandardMaterial color="#6a6a6a" transparent opacity={0.12} />
+      <mesh position={[baseWidth * 0.18, baseHeight * 0.3, -baseDepth * 0.2]} rotation={[0.45, -0.6, 0.4]} castShadow>
+        <boxGeometry args={[0.035, 0.3, 0.035]} />
+        <meshStandardMaterial color="#3a3a3a" metalness={0.75} roughness={0.55} />
       </mesh>
       
-      {/* Small debris particles */}
-      <mesh position={[0.32, 0.02, 0.08]}>
-        <boxGeometry args={[0.04, 0.04, 0.04]} />
+      {/* Broken antenna/rooftop equipment */}
+      <mesh position={[0, baseHeight * 0.65, 0]} rotation={[0.8, 0.3, 0.2]} castShadow>
+        <cylinderGeometry args={[0.018, 0.022, 0.25, 8]} />
+        <meshStandardMaterial color="#888888" metalness={0.9} roughness={0.1} />
+      </mesh>
+      
+      {/* Cracked floor slabs */}
+      <mesh position={[baseWidth * 0.35, 0.02, baseDepth * 0.3]} rotation={[-0.08, 0.18, 0.1]}>
+        <boxGeometry args={[0.22, 0.03, 0.2]} />
+        <meshStandardMaterial color="#3a3a3a" roughness={0.96} />
+      </mesh>
+      <mesh position={[-baseWidth * 0.32, 0.02, -baseDepth * 0.28]} rotation={[0.08, -0.25, -0.08]}>
+        <boxGeometry args={[0.2, 0.03, 0.18]} />
+        <meshStandardMaterial color="#404040" roughness={0.96} />
+      </mesh>
+      
+      {/* Small fires/embers in debris */}
+      <mesh position={[baseWidth * 0.1, baseHeight * 0.2, baseDepth * 0.08]}>
+        <sphereGeometry args={[0.03, 8, 8]} />
+        <meshStandardMaterial 
+          color="#FF4400" 
+          emissive="#FF4400" 
+          emissiveIntensity={emberGlow * 1.8} 
+        />
+      </mesh>
+      <mesh position={[-baseWidth * 0.15, baseHeight * 0.15, -baseDepth * 0.1]}>
+        <sphereGeometry args={[0.025, 8, 8]} />
+        <meshStandardMaterial 
+          color="#FF6600" 
+          emissive="#FF6600" 
+          emissiveIntensity={emberGlow * 1.5} 
+        />
+      </mesh>
+      
+      {/* Dust/smoke clouds - animated */}
+      <mesh position={[0, baseHeight * 0.35, 0]}>
+        <sphereGeometry args={[baseWidth * 0.5, 12, 12]} />
+        <meshStandardMaterial color="#8a8a8a" transparent opacity={smokeOpacity * 1.5} />
+      </mesh>
+      <mesh position={[baseWidth * 0.15, baseHeight * 0.5, baseDepth * 0.1]} rotation={[0.2, 0.3, 0]}>
+        <sphereGeometry args={[baseWidth * 0.4, 10, 10]} />
+        <meshStandardMaterial color="#7a7a7a" transparent opacity={smokeOpacity * 1.2} />
+      </mesh>
+      <mesh position={[-baseWidth * 0.1, baseHeight * 0.6, -baseDepth * 0.08]} rotation={[0.3, -0.2, 0.1]}>
+        <sphereGeometry args={[baseWidth * 0.35, 10, 10]} />
+        <meshStandardMaterial color="#6a6a6a" transparent opacity={smokeOpacity} />
+      </mesh>
+      
+      {/* Small debris particles scattered */}
+      <mesh position={[baseWidth * 0.4, 0.03, baseDepth * 0.12]}>
+        <boxGeometry args={[0.05, 0.04, 0.05]} />
         <meshStandardMaterial color="#555555" roughness={1} />
       </mesh>
-      <mesh position={[-0.28, 0.02, 0.14]}>
-        <boxGeometry args={[0.05, 0.03, 0.05]} />
+      <mesh position={[-baseWidth * 0.35, 0.03, baseDepth * 0.18]}>
+        <boxGeometry args={[0.06, 0.04, 0.06]} />
         <meshStandardMaterial color="#4a4a4a" roughness={1} />
       </mesh>
-      <mesh position={[0.18, 0.02, -0.24]}>
-        <boxGeometry args={[0.04, 0.03, 0.04]} />
+      <mesh position={[baseWidth * 0.22, 0.03, -baseDepth * 0.3]}>
+        <boxGeometry args={[0.05, 0.04, 0.05]} />
         <meshStandardMaterial color="#505050" roughness={1} />
       </mesh>
+      
+      {/* Fire lighting */}
+      <pointLight 
+        position={[baseWidth * 0.1, baseHeight * 0.2, baseDepth * 0.08]} 
+        color="#FF4400" 
+        intensity={emberGlow * 1.5} 
+        distance={3} 
+        decay={2}
+      />
     </group>
   );
 };
@@ -1088,33 +1189,440 @@ const PoliceCarModel = ({ position }: { position: [number, number, number] }) =>
   const meshRef = useRef<THREE.Group>(null);
   const time = useRef(0);
   useFrame((_, delta) => { time.current += delta; });
-  const flash = Math.abs(Math.sin(time.current * 3)) * 1.5;
+  const flash = Math.abs(Math.sin(time.current * 4)) * 1.5;
+  const flash2 = Math.abs(Math.cos(time.current * 4.3)) * 1.5;
+  
   return (
     <group position={position} ref={meshRef}>
-      <mesh position={[0, 0.08, 0]} castShadow><boxGeometry args={[0.45, 0.2, 0.25]} /><meshStandardMaterial color="#FFFFFF" roughness={0.2} metalness={0.4} /></mesh>
-      <mesh position={[0.15, 0.16, 0]} castShadow><boxGeometry args={[0.18, 0.12, 0.22]} /><meshStandardMaterial color="#FFFFFF" roughness={0.2} /></mesh>
-      <mesh position={[0, 0.19, 0]} castShadow><boxGeometry args={[0.25, 0.04, 0.1]} /><meshStandardMaterial color="#1a1a1a" /></mesh>
-      <mesh position={[-0.08, 0.2, 0.03]}><boxGeometry args={[0.08, 0.03, 0.05]} /><meshStandardMaterial color="#FF0000" emissive="#FF0000" emissiveIntensity={flash} transparent opacity={0.9} /></mesh>
-      <mesh position={[0.08, 0.2, 0.03]}><boxGeometry args={[0.08, 0.03, 0.05]} /><meshStandardMaterial color="#0055FF" emissive="#0055FF" emissiveIntensity={flash} transparent opacity={0.9} /></mesh>
-      <mesh position={[0.15, 0.03, 0.14]} rotation={[0, 0, Math.PI/2]} castShadow><cylinderGeometry args={[0.04, 0.04, 0.03, 16]} /><meshStandardMaterial color="#0a0a0a" /></mesh>
-      <mesh position={[0.15, 0.03, -0.14]} rotation={[0, 0, Math.PI/2]} castShadow><cylinderGeometry args={[0.04, 0.04, 0.03, 16]} /><meshStandardMaterial color="#0a0a0a" /></mesh>
-      <mesh position={[-0.15, 0.03, 0.14]} rotation={[0, 0, Math.PI/2]} castShadow><cylinderGeometry args={[0.04, 0.04, 0.03, 16]} /><meshStandardMaterial color="#0a0a0a" /></mesh>
-      <mesh position={[-0.15, 0.03, -0.14]} rotation={[0, 0, Math.PI/2]} castShadow><cylinderGeometry args={[0.04, 0.04, 0.03, 16]} /><meshStandardMaterial color="#0a0a0a" /></mesh>
-      <pointLight position={[-0.08, 0.2, 0]} color="#FF0000" intensity={flash * 0.8} distance={2} />
-      <pointLight position={[0.08, 0.2, 0]} color="#0055FF" intensity={flash * 0.8} distance={2} />
+      {/* Main body - sleek sedan shape */}
+      <mesh position={[0, 0.1, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.5, 0.22, 0.28]} />
+        <meshStandardMaterial color="#FFFFFF" roughness={0.15} metalness={0.5} />
+      </mesh>
+      
+      {/* Hood slope */}
+      <mesh position={[0.22, 0.1, 0]} rotation={[0, 0, -0.15]} castShadow>
+        <boxGeometry args={[0.08, 0.18, 0.28]} />
+        <meshStandardMaterial color="#FFFFFF" roughness={0.15} metalness={0.5} />
+      </mesh>
+      
+      {/* Cabin */}
+      <mesh position={[0.02, 0.2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.24, 0.14, 0.26]} />
+        <meshStandardMaterial color="#F5F5F5" roughness={0.15} metalness={0.45} />
+      </mesh>
+      
+      {/* Windshield */}
+      <mesh position={[0.14, 0.2, 0]} rotation={[0, 0, -0.2]} castShadow>
+        <boxGeometry args={[0.03, 0.13, 0.24]} />
+        <meshStandardMaterial color="#3388BB" transparent opacity={0.65} roughness={0.05} />
+      </mesh>
+      
+      {/* Rear window */}
+      <mesh position={[-0.1, 0.2, 0]} rotation={[0, 0, 0.15]} castShadow>
+        <boxGeometry args={[0.03, 0.12, 0.24]} />
+        <meshStandardMaterial color="#3388BB" transparent opacity={0.65} roughness={0.05} />
+      </mesh>
+      
+      {/* Side windows */}
+      <mesh position={[0.02, 0.2, 0.135]}>
+        <boxGeometry args={[0.22, 0.11, 0.002]} />
+        <meshStandardMaterial color="#4499CC" transparent opacity={0.6} roughness={0.05} />
+      </mesh>
+      <mesh position={[0.02, 0.2, -0.135]}>
+        <boxGeometry args={[0.22, 0.11, 0.002]} />
+        <meshStandardMaterial color="#4499CC" transparent opacity={0.6} roughness={0.05} />
+      </mesh>
+      
+      {/* Blue stripe */}
+      <mesh position={[0, 0.11, 0.143]}>
+        <boxGeometry args={[0.52, 0.06, 0.002]} />
+        <meshStandardMaterial color="#0055FF" roughness={0.2} metalness={0.3} />
+      </mesh>
+      <mesh position={[0, 0.11, -0.143]}>
+        <boxGeometry args={[0.52, 0.06, 0.002]} />
+        <meshStandardMaterial color="#0055FF" roughness={0.2} metalness={0.3} />
+      </mesh>
+      
+      {/* POLICE text simulation */}
+      <mesh position={[0, 0.11, 0.145]}>
+        <boxGeometry args={[0.3, 0.04, 0.001]} />
+        <meshStandardMaterial color="#FFFFFF" emissive="#FFFFFF" emissiveIntensity={0.4} />
+      </mesh>
+      
+      {/* Emergency light bar */}
+      <mesh position={[0, 0.28, 0]} castShadow>
+        <boxGeometry args={[0.28, 0.04, 0.11]} />
+        <meshStandardMaterial color="#1a1a1a" roughness={0.3} metalness={0.6} />
+      </mesh>
+      
+      {/* Red lights (left side) */}
+      <mesh position={[-0.1, 0.285, 0.03]}>
+        <boxGeometry args={[0.07, 0.035, 0.05]} />
+        <meshStandardMaterial 
+          color="#FF0000" 
+          emissive="#FF0000" 
+          emissiveIntensity={flash} 
+          transparent 
+          opacity={0.9}
+        />
+      </mesh>
+      <mesh position={[-0.1, 0.285, -0.03]}>
+        <boxGeometry args={[0.07, 0.035, 0.05]} />
+        <meshStandardMaterial 
+          color="#FF0000" 
+          emissive="#FF0000" 
+          emissiveIntensity={flash} 
+          transparent 
+          opacity={0.9}
+        />
+      </mesh>
+      
+      {/* Blue lights (right side) */}
+      <mesh position={[0.1, 0.285, 0.03]}>
+        <boxGeometry args={[0.07, 0.035, 0.05]} />
+        <meshStandardMaterial 
+          color="#0055FF" 
+          emissive="#0055FF" 
+          emissiveIntensity={flash2} 
+          transparent 
+          opacity={0.9}
+        />
+      </mesh>
+      <mesh position={[0.1, 0.285, -0.03]}>
+        <boxGeometry args={[0.07, 0.035, 0.05]} />
+        <meshStandardMaterial 
+          color="#0055FF" 
+          emissive="#0055FF" 
+          emissiveIntensity={flash2} 
+          transparent 
+          opacity={0.9}
+        />
+      </mesh>
+      
+      {/* Front grille */}
+      <mesh position={[0.27, 0.08, 0]}>
+        <boxGeometry args={[0.01, 0.09, 0.2]} />
+        <meshStandardMaterial color="#1a1a1a" roughness={0.4} metalness={0.6} />
+      </mesh>
+      
+      {/* Headlights */}
+      <mesh position={[0.27, 0.08, 0.1]}>
+        <circleGeometry args={[0.022, 12]} />
+        <meshStandardMaterial color="#FFFFCC" emissive="#FFFFAA" emissiveIntensity={0.9} />
+      </mesh>
+      <mesh position={[0.27, 0.08, -0.1]}>
+        <circleGeometry args={[0.022, 12]} />
+        <meshStandardMaterial color="#FFFFCC" emissive="#FFFFAA" emissiveIntensity={0.9} />
+      </mesh>
+      
+      {/* Wheels */}
+      <mesh position={[0.16, 0.035, 0.15]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.042, 0.042, 0.04, 16]} />
+        <meshStandardMaterial color="#0a0a0a" roughness={0.85} />
+      </mesh>
+      <mesh position={[0.16, 0.035, -0.15]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.042, 0.042, 0.04, 16]} />
+        <meshStandardMaterial color="#0a0a0a" roughness={0.85} />
+      </mesh>
+      <mesh position={[-0.16, 0.035, 0.15]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.042, 0.042, 0.04, 16]} />
+        <meshStandardMaterial color="#0a0a0a" roughness={0.85} />
+      </mesh>
+      <mesh position={[-0.16, 0.035, -0.15]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.042, 0.042, 0.04, 16]} />
+        <meshStandardMaterial color="#0a0a0a" roughness={0.85} />
+      </mesh>
+      
+      {/* Wheel rims */}
+      <mesh position={[0.16, 0.035, 0.155]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.022, 0.022, 0.002, 16]} />
+        <meshStandardMaterial color="#CCCCCC" roughness={0.2} metalness={0.8} />
+      </mesh>
+      <mesh position={[0.16, 0.035, -0.155]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.022, 0.022, 0.002, 16]} />
+        <meshStandardMaterial color="#CCCCCC" roughness={0.2} metalness={0.8} />
+      </mesh>
+      <mesh position={[-0.16, 0.035, 0.155]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.022, 0.022, 0.002, 16]} />
+        <meshStandardMaterial color="#CCCCCC" roughness={0.2} metalness={0.8} />
+      </mesh>
+      <mesh position={[-0.16, 0.035, -0.155]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.022, 0.022, 0.002, 16]} />
+        <meshStandardMaterial color="#CCCCCC" roughness={0.2} metalness={0.8} />
+      </mesh>
+      
+      {/* Side mirrors */}
+      <mesh position={[0.08, 0.18, 0.15]}>
+        <boxGeometry args={[0.02, 0.03, 0.025]} />
+        <meshStandardMaterial color="#1a1a1a" roughness={0.3} metalness={0.7} />
+      </mesh>
+      <mesh position={[0.08, 0.18, -0.15]}>
+        <boxGeometry args={[0.02, 0.03, 0.025]} />
+        <meshStandardMaterial color="#1a1a1a" roughness={0.3} metalness={0.7} />
+      </mesh>
+      
+      {/* Antennas */}
+      <mesh position={[-0.08, 0.3, 0.08]}>
+        <cylinderGeometry args={[0.005, 0.005, 0.15, 8]} />
+        <meshStandardMaterial color="#2a2a2a" roughness={0.4} metalness={0.7} />
+      </mesh>
+      
+      {/* Emergency lights glow */}
+      <pointLight 
+        position={[-0.1, 0.285, 0]} 
+        color="#FF0000" 
+        intensity={flash * 1.2} 
+        distance={2.5} 
+        decay={2}
+      />
+      <pointLight 
+        position={[0.1, 0.285, 0]} 
+        color="#0055FF" 
+        intensity={flash2 * 1.0} 
+        distance={2.5} 
+        decay={2}
+      />
     </group>
   );
 };
 
 const FireTruckModel = ({ position }: { position: [number, number, number] }) => {
+  const meshRef = useRef<THREE.Group>(null);
+  const time = useRef(0);
+  
+  useFrame((_, delta) => {
+    time.current += delta;
+  });
+
+  const flash = Math.abs(Math.sin(time.current * 3.5)) * 1.5;
+  const flash2 = Math.abs(Math.cos(time.current * 3.8)) * 1.5;
+  
   return (
-    <group position={position}>
-      <mesh position={[0, 0.15, 0]} castShadow><boxGeometry args={[0.6, 0.3, 0.32]} /><meshStandardMaterial color="#CC0000" roughness={0.2} metalness={0.3} /></mesh>
-      <mesh position={[0.2, 0.25, 0]} castShadow><boxGeometry args={[0.25, 0.18, 0.3]} /><meshStandardMaterial color="#CC0000" roughness={0.2} /></mesh>
-      <mesh position={[0, 0.32, 0]} castShadow><boxGeometry args={[0.35, 0.05, 0.12]} /><meshStandardMaterial color="#FFD700" /></mesh>
-      <mesh position={[-0.2, 0.2, 0.1]} castShadow><cylinderGeometry args={[0.08, 0.08, 0.3, 12]} /><meshStandardMaterial color="#888888" metalness={0.7} /></mesh>
-      <mesh position={[0.2, 0.04, 0.18]} rotation={[0, 0, Math.PI/2]} castShadow><cylinderGeometry args={[0.05, 0.05, 0.04, 16]} /><meshStandardMaterial color="#0a0a0a" /></mesh>
-      <mesh position={[-0.2, 0.04, 0.18]} rotation={[0, 0, Math.PI/2]} castShadow><cylinderGeometry args={[0.05, 0.05, 0.04, 16]} /><meshStandardMaterial color="#0a0a0a" /></mesh>
+    <group position={position} ref={meshRef}>
+      {/* Main cargo/equipment body */}
+      <mesh position={[0, 0.18, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.65, 0.35, 0.35]} />
+        <meshStandardMaterial color="#CC0000" roughness={0.2} metalness={0.35} />
+      </mesh>
+      
+      {/* Cabin */}
+      <mesh position={[0.25, 0.28, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.28, 0.2, 0.33]} />
+        <meshStandardMaterial color="#CC0000" roughness={0.2} metalness={0.35} />
+      </mesh>
+      
+      {/* Windshield */}
+      <mesh position={[0.39, 0.28, 0]} castShadow>
+        <boxGeometry args={[0.02, 0.17, 0.31]} />
+        <meshStandardMaterial color="#3388BB" transparent opacity={0.65} roughness={0.05} />
+      </mesh>
+      
+      {/* Side cabin windows */}
+      <mesh position={[0.25, 0.28, 0.17]}>
+        <boxGeometry args={[0.25, 0.15, 0.002]} />
+        <meshStandardMaterial color="#4499CC" transparent opacity={0.6} roughness={0.05} />
+      </mesh>
+      <mesh position={[0.25, 0.28, -0.17]}>
+        <boxGeometry args={[0.25, 0.15, 0.002]} />
+        <meshStandardMaterial color="#4499CC" transparent opacity={0.6} roughness={0.05} />
+      </mesh>
+      
+      {/* White stripe */}
+      <mesh position={[0, 0.14, 0.177]}>
+        <boxGeometry args={[0.66, 0.08, 0.002]} />
+        <meshStandardMaterial color="#FFFFFF" roughness={0.25} metalness={0.2} />
+      </mesh>
+      <mesh position={[0, 0.14, -0.177]}>
+        <boxGeometry args={[0.66, 0.08, 0.002]} />
+        <meshStandardMaterial color="#FFFFFF" roughness={0.25} metalness={0.2} />
+      </mesh>
+      
+      {/* Yellow safety stripe */}
+      <mesh position={[0, 0.25, 0.177]}>
+        <boxGeometry args={[0.66, 0.04, 0.002]} />
+        <meshStandardMaterial color="#FFD700" roughness={0.25} />
+      </mesh>
+      <mesh position={[0, 0.25, -0.177]}>
+        <boxGeometry args={[0.66, 0.04, 0.002]} />
+        <meshStandardMaterial color="#FFD700" roughness={0.25} />
+      </mesh>
+      
+      {/* Emergency light bar on top */}
+      <mesh position={[0.1, 0.38, 0]} castShadow>
+        <boxGeometry args={[0.4, 0.05, 0.13]} />
+        <meshStandardMaterial color="#1a1a1a" roughness={0.3} metalness={0.6} />
+      </mesh>
+      
+      {/* Red emergency lights */}
+      <mesh position={[-0.05, 0.39, 0.035]}>
+        <boxGeometry args={[0.12, 0.04, 0.06]} />
+        <meshStandardMaterial 
+          color="#FF0000" 
+          emissive="#FF0000" 
+          emissiveIntensity={flash} 
+          transparent 
+          opacity={0.9}
+        />
+      </mesh>
+      <mesh position={[-0.05, 0.39, -0.035]}>
+        <boxGeometry args={[0.12, 0.04, 0.06]} />
+        <meshStandardMaterial 
+          color="#FF0000" 
+          emissive="#FF0000" 
+          emissiveIntensity={flash} 
+          transparent 
+          opacity={0.9}
+        />
+      </mesh>
+      
+      {/* White strobe lights */}
+      <mesh position={[0.15, 0.39, 0.035]}>
+        <boxGeometry args={[0.1, 0.04, 0.06]} />
+        <meshStandardMaterial 
+          color="#FFFFFF" 
+          emissive="#FFFFFF" 
+          emissiveIntensity={flash2} 
+          transparent 
+          opacity={0.9}
+        />
+      </mesh>
+      <mesh position={[0.15, 0.39, -0.035]}>
+        <boxGeometry args={[0.1, 0.04, 0.06]} />
+        <meshStandardMaterial 
+          color="#FFFFFF" 
+          emissive="#FFFFFF" 
+          emissiveIntensity={flash2} 
+          transparent 
+          opacity={0.9}
+        />
+      </mesh>
+      
+      {/* Fire hose reels */}
+      <mesh position={[-0.22, 0.24, 0.12]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+        <cylinderGeometry args={[0.09, 0.09, 0.08, 16]} />
+        <meshStandardMaterial color="#888888" metalness={0.75} roughness={0.3} />
+      </mesh>
+      <mesh position={[-0.22, 0.24, -0.12]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+        <cylinderGeometry args={[0.09, 0.09, 0.08, 16]} />
+        <meshStandardMaterial color="#888888" metalness={0.75} roughness={0.3} />
+      </mesh>
+      
+      {/* Hose nozzle mounted */}
+      <mesh position={[-0.22, 0.24, 0.2]} rotation={[0, Math.PI / 4, 0]}>
+        <cylinderGeometry args={[0.015, 0.02, 0.12, 12]} />
+        <meshStandardMaterial color="#666666" metalness={0.8} roughness={0.25} />
+      </mesh>
+      
+      {/* Equipment compartments */}
+      <mesh position={[0, 0.08, 0.178]}>
+        <boxGeometry args={[0.5, 0.12, 0.002]} />
+        <meshStandardMaterial color="#AA0000" roughness={0.25} />
+      </mesh>
+      <mesh position={[0, 0.08, -0.178]}>
+        <boxGeometry args={[0.5, 0.12, 0.002]} />
+        <meshStandardMaterial color="#AA0000" roughness={0.25} />
+      </mesh>
+      
+      {/* Compartment handles */}
+      <mesh position={[-0.15, 0.08, 0.182]}>
+        <boxGeometry args={[0.08, 0.015, 0.015]} />
+        <meshStandardMaterial color="#333333" roughness={0.3} metalness={0.7} />
+      </mesh>
+      <mesh position={[0, 0.08, 0.182]}>
+        <boxGeometry args={[0.08, 0.015, 0.015]} />
+        <meshStandardMaterial color="#333333" roughness={0.3} metalness={0.7} />
+      </mesh>
+      
+      {/* Front grille */}
+      <mesh position={[0.42, 0.12, 0]}>
+        <boxGeometry args={[0.01, 0.12, 0.26]} />
+        <meshStandardMaterial color="#1a1a1a" roughness={0.4} metalness={0.6} />
+      </mesh>
+      
+      {/* Headlights */}
+      <mesh position={[0.42, 0.12, 0.12]}>
+        <circleGeometry args={[0.028, 12]} />
+        <meshStandardMaterial color="#FFFFCC" emissive="#FFFFAA" emissiveIntensity={1.0} />
+      </mesh>
+      <mesh position={[0.42, 0.12, -0.12]}>
+        <circleGeometry args={[0.028, 12]} />
+        <meshStandardMaterial color="#FFFFCC" emissive="#FFFFAA" emissiveIntensity={1.0} />
+      </mesh>
+      
+      {/* Wheels (large fire truck wheels) */}
+      <mesh position={[0.25, 0.05, 0.2]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.055, 0.055, 0.05, 16]} />
+        <meshStandardMaterial color="#0a0a0a" roughness={0.9} />
+      </mesh>
+      <mesh position={[0.25, 0.05, -0.2]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.055, 0.055, 0.05, 16]} />
+        <meshStandardMaterial color="#0a0a0a" roughness={0.9} />
+      </mesh>
+      <mesh position={[-0.2, 0.05, 0.2]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.055, 0.055, 0.05, 16]} />
+        <meshStandardMaterial color="#0a0a0a" roughness={0.9} />
+      </mesh>
+      <mesh position={[-0.2, 0.05, -0.2]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.055, 0.055, 0.05, 16]} />
+        <meshStandardMaterial color="#0a0a0a" roughness={0.9} />
+      </mesh>
+      
+      {/* Wheel rims */}
+      <mesh position={[0.25, 0.05, 0.205]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.03, 0.03, 0.002, 16]} />
+        <meshStandardMaterial color="#CCCCCC" roughness={0.2} metalness={0.8} />
+      </mesh>
+      <mesh position={[0.25, 0.05, -0.205]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.03, 0.03, 0.002, 16]} />
+        <meshStandardMaterial color="#CCCCCC" roughness={0.2} metalness={0.8} />
+      </mesh>
+      <mesh position={[-0.2, 0.05, 0.205]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.03, 0.03, 0.002, 16]} />
+        <meshStandardMaterial color="#CCCCCC" roughness={0.2} metalness={0.8} />
+      </mesh>
+      <mesh position={[-0.2, 0.05, -0.205]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.03, 0.03, 0.002, 16]} />
+        <meshStandardMaterial color="#CCCCCC" roughness={0.2} metalness={0.8} />
+      </mesh>
+      
+      {/* Ladder mount on top */}
+      <mesh position={[-0.05, 0.37, 0]} castShadow>
+        <boxGeometry args={[0.45, 0.02, 0.08]} />
+        <meshStandardMaterial color="#666666" roughness={0.35} metalness={0.65} />
+      </mesh>
+      
+      {/* Side mirrors */}
+      <mesh position={[0.3, 0.26, 0.18]}>
+        <boxGeometry args={[0.02, 0.04, 0.03]} />
+        <meshStandardMaterial color="#1a1a1a" roughness={0.3} metalness={0.7} />
+      </mesh>
+      <mesh position={[0.3, 0.26, -0.18]}>
+        <boxGeometry args={[0.02, 0.04, 0.03]} />
+        <meshStandardMaterial color="#1a1a1a" roughness={0.3} metalness={0.7} />
+      </mesh>
+      
+      {/* Siren */}
+      <mesh position={[0.2, 0.4, 0]}>
+        <boxGeometry args={[0.08, 0.025, 0.06]} />
+        <meshStandardMaterial color="#2a2a2a" roughness={0.4} metalness={0.5} />
+      </mesh>
+      
+      {/* Emergency lights glow */}
+      <pointLight 
+        position={[-0.05, 0.39, 0]} 
+        color="#FF0000" 
+        intensity={flash * 1.5} 
+        distance={3} 
+        decay={2}
+      />
+      <pointLight 
+        position={[0.15, 0.39, 0]} 
+        color="#FFFFFF" 
+        intensity={flash2 * 1.2} 
+        distance={2.5} 
+        decay={2}
+      />
     </group>
   );
 };

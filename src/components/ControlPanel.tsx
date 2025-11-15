@@ -26,8 +26,6 @@ interface ControlPanelProps {
   onChangePrompt: (val: string) => void;
   onSubmitPrompt: () => void;
   onApplyPreset: (preset: string) => void;
-  agentSampleSize: number;
-  onChangeAgentSampleSize: (size: number) => void;
 }
 
 export const ControlPanel = ({
@@ -49,8 +47,6 @@ export const ControlPanel = ({
   onChangePrompt,
   onSubmitPrompt,
   onApplyPreset,
-  agentSampleSize,
-  onChangeAgentSampleSize,
 }: ControlPanelProps) => {
   const getAgentIcon = (type: Agent['type']) => {
     switch (type) {
@@ -141,19 +137,6 @@ export const ControlPanel = ({
               className="font-mono"
             />
           </div>
-          <div>
-            <div className="text-xs text-muted-foreground mb-1">Agent Sample Size (for Director)</div>
-            <Input
-              type="number"
-              value={agentSampleSize}
-              onChange={e => onChangeAgentSampleSize(parseInt(e.target.value) || 50)}
-              placeholder="50"
-              min="10"
-              max="500"
-              className="font-mono"
-            />
-            <div className="text-xs text-muted-foreground mt-1">Higher = more context, but may exceed token limits</div>
-          </div>
         </div>
         <div className="flex gap-2 mt-3">
           <Button size="sm" variant="outline" onClick={onValidateLLM}>Test Connection</Button>
@@ -163,6 +146,10 @@ export const ControlPanel = ({
       {/* Natural Language Scenario */}
       <Card className="p-4 bg-card border-border">
         <h2 className="text-lg font-semibold mb-3 text-foreground">Scenario Prompt</h2>
+        <div className="flex items-center gap-2 mb-2">
+          <Button size="sm" onClick={onSubmitPrompt}>Open Prompt</Button>
+          <span className="text-xs text-muted-foreground">Opens floating scenario input overlay</span>
+        </div>
         <Textarea
           value={userPrompt}
           onChange={e => onChangePrompt(e.target.value)}
